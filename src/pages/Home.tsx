@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, orderBy, query } from 'firebase/firestore';
 import React, { useCallback, useEffect, useState } from 'react'
 import { auth, db } from '../firebase-config';
 import Post from '../components/Post';
@@ -12,11 +12,13 @@ interface IPost {
   id: string;
   title: string;
   post: string;
+  createdAt: Date;
   author: {
     name: string;
     photoURL: string;
     id: string;
   };
+  likes: string[];
 }
 
 function Home({isAuth}: Props) {
@@ -31,16 +33,21 @@ function Home({isAuth}: Props) {
 
   useEffect(() => {
     const getPosts = async () => {
-      const data = await getDocs(postsCollectionRef);
+
+      const q = query(postsCollectionRef, orderBy("createdAt", "desc"));
+
+      const data = await getDocs(q);
       setPostList(data.docs.map((doc) => ({
         id: doc.id,
         title: doc.data().title || '',
         post: doc.data().post || '',
+        createdAt: doc.data().createdAt?.toDate(),
         author: {
           name: doc.data().author?.name || 'Unknown',
           photoURL: doc.data().author?.photoURL || '',  
           id: doc.data().author?.id,
         },
+        likes: doc.data().likes || []
       })));
     }
 
@@ -53,7 +60,16 @@ function Home({isAuth}: Props) {
       <Row className='container-fluid mx-auto'> 
         {postList.map((post) => (
           <Col lg={3} md={5} sm={7} xs={12} key={post.id} className='mb-3'>
-            <Post title={post.title} post={post.post} author={post.author} deleteDoc={deletePost} id={post.id} isAuth={isAuth} uid={auth.currentUser?.uid || ''}/>
+            <Post 
+              title={post.title} 
+              post={post.post} 
+              author={post.author} 
+              deleteDoc={deletePost} 
+              id={post.id} 
+              isAuth={isAuth} 
+              uid={auth.currentUser?.uid || ''} 
+              createdAt={post.createdAt}
+              likes={post.likes}/>
           </Col>
         ))}
         </Row>

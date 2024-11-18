@@ -33,13 +33,13 @@ function NavigationBar({ isAuth, setIsAuth }: Props) {
                     <Navbar.Toggle aria-controls="navbar-nav" style={{backgroundColor: 'white'}}/>
                     <Navbar.Collapse id="navbar-nav">
                         <Nav className="mx-auto">
-                            <Nav.Link as={Link} to="/" className="nav-link link-light">Home</Nav.Link>
-                            <Nav.Link as={Link} to="/createpost" className="nav-link px-2 link-primary">Create Post</Nav.Link>
+                            <Nav.Link as={Link} to="/" className="nav-link link-secondary">Home</Nav.Link>
+                            <Nav.Link as={Link} to="/createpost" className="nav-link link-primary">Create Post</Nav.Link>
                         </Nav>
                         <div className="d-flex">
                             {!isAuth
-                                ? <Link to="/login" className="btn btn-outline-primary me-2">Log in</Link>
-                                : <Link to="" onClick={signUserOut} className="btn btn-outline-primary me-2">Log out</Link>
+                                ? <Nav.Link as={Link} to="/login" className="nav-link link-primary me-2">Log in</Nav.Link>
+                                : <Nav.Link  onClick={signUserOut} className="nav-link link-primary me-2">Log out</Nav.Link>
                             }
                         </div>
                     </Navbar.Collapse>

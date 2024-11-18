@@ -38,6 +38,8 @@ export default function CreatePost({ isAuth }: Props) {
         title,
         post,
         author,
+        createdAt: new Date(),
+        likes: [],
       });
       navigate("/");
     } catch (error) {
