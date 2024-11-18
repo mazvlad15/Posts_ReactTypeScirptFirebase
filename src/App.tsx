@@ -1,24 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import CreatePost from './pages/CreatePost';
+import Login from './pages/Login';
+import NavigationBar from './components/NavigationBar';
+import Footer from './components/Footer';
 
 function App() {
+
+  const [isAuth, setIsAuth] = useState<boolean>(localStorage.getItem("isAuth") === "true");
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='App'>
+    <Router>
+      <NavigationBar isAuth={isAuth} setIsAuth={setIsAuth}/>
+      <Routes>
+        <Route path='/' element={<Home isAuth={isAuth}/>} />
+        <Route path='/createpost' element={<CreatePost isAuth={isAuth} />} />
+        <Route path='/login' element={<Login setIsAuth={setIsAuth}/>} />
+      </Routes>
+      <Footer />
+    </Router>
     </div>
   );
 }
