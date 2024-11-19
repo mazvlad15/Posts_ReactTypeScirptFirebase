@@ -19,6 +19,14 @@ interface IPost {
     id: string;
   };
   likes: string[];
+  comments: [
+    {
+      commentText: string;
+      authorId: string;
+      createdAt: Date;
+      id: string;
+    }
+  ];
 }
 
 function Home({isAuth}: Props) {
@@ -37,6 +45,7 @@ function Home({isAuth}: Props) {
       const q = query(postsCollectionRef, orderBy("createdAt", "desc"));
 
       const data = await getDocs(q);
+      console.log(data.docs);
       setPostList(data.docs.map((doc) => ({
         id: doc.id,
         title: doc.data().title || '',
@@ -47,12 +56,18 @@ function Home({isAuth}: Props) {
           photoURL: doc.data().author?.photoURL || '',  
           id: doc.data().author?.id,
         },
-        likes: doc.data().likes || []
+        likes: doc.data().likes || [],
+        comments: (doc.data().comments || []).map((comment: any) => ({
+          commentText: comment.commentText || '',
+          authorId: comment.authorId || '',
+          createdAt: comment.createdAt,
+          id: comment.id,
+        })),
       })));
     }
 
     getPosts();
-  }, [deletePost, postsCollectionRef])
+  }, [deletePost])
 
 
   return (
@@ -69,9 +84,11 @@ function Home({isAuth}: Props) {
               isAuth={isAuth} 
               uid={auth.currentUser?.uid || ''} 
               createdAt={post.createdAt}
-              likes={post.likes}/>
+              likes={post.likes}
+              comments={post.comments}/>
           </Col>
         ))}
+        
         </Row>
       </div>
   )

@@ -1,0 +1,12 @@
+.message{
+    cursor: pointer;    
+}
+
+.inputMessage{
+    border: none;
+    padding: 4px;
+}
+
+.inputMessage:focus{
+    outline: none;
+}

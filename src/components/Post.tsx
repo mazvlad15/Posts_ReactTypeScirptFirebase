@@ -5,6 +5,8 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import { formatDistanceToNow } from 'date-fns';
 import { updateDoc, arrayUnion, arrayRemove, doc } from 'firebase/firestore';
 import { db } from '../firebase-config';
+import Comment from './Comment';
+import ModeCommentIcon from '@mui/icons-material/ModeComment';
 
 type Props = {
     title: string;
@@ -20,13 +22,25 @@ type Props = {
     uid: string | undefined;
     createdAt: Date;
     likes: string[];
+    comments: [
+        {
+            commentText: string;
+            authorId: string;
+            createdAt: Date;
+            id: string;
+        }
+    ];
 };
 
-export default function Post({ title, post, author: { name, photoURL, id }, deleteDoc, id: postId, isAuth, uid, createdAt, likes }: Props) {
+export default function Post({ title, post, author: { name, photoURL, id }, deleteDoc, id: postId, isAuth, uid, createdAt, likes, comments }: Props) {
 
     const timeAgo = createdAt ? formatDistanceToNow(new Date(createdAt), { addSuffix: true }) : "Just now";
 
     const [like, setLike] = useState<boolean>(likes.includes(uid || ''));
+    const [show, setShow] = useState<boolean>(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
     useEffect(() => {
         setLike(likes.includes(uid || ''));
@@ -66,12 +80,23 @@ export default function Post({ title, post, author: { name, photoURL, id }, dele
                 <br />
                 {post}
             </Toast.Body>
-            <Toast.Body className='d-flex'>
+            <Toast.Body className='d-flex align-items-center'>
                 {like ? 
                     <FavoriteIcon style={{ cursor: 'pointer' }} onClick={handleLike} /> : 
                     <FavoriteBorderIcon style={{ cursor: 'pointer' }} onClick={handleLike} />
                 }
-                <span className='ms-auto' style={{fontFamily: 'Space Grotesk, serif'}}>{likes.length}</span>
+                <span className='ms-1' style={{fontFamily: 'Space Grotesk, serif'}}>{likes.length}</span>
+                <Comment 
+                    handleClose={handleClose} 
+                    show={show} 
+                    postId={postId} 
+                    comments={comments} 
+                    authorId={id} 
+                    isAuth={isAuth} 
+                    uid={uid}
+                    name={name}
+                    photoURL={photoURL}/>
+                <ModeCommentIcon className='ms-auto me-2' onClick={handleShow} style={{ cursor: 'pointer' }} />
             </Toast.Body>
         </Toast>
     );

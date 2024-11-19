@@ -6,6 +6,7 @@ import CreatePost from './pages/CreatePost';
 import Login from './pages/Login';
 import NavigationBar from './components/NavigationBar';
 import Footer from './components/Footer';
+import WrongPage from './pages/WrongPage';
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
         <Route path='/' element={<Home isAuth={isAuth}/>} />
         <Route path='/createpost' element={<CreatePost isAuth={isAuth} />} />
         <Route path='/login' element={<Login setIsAuth={setIsAuth}/>} />
+        <Route path='*' element={<WrongPage />} />
       </Routes>
       <Footer />
     </Router>
