@@ -38,13 +38,10 @@ export default function Post({ title, post, author: { name, photoURL, id }, dele
 
     const [like, setLike] = useState<boolean>(likes.includes(uid || ''));
     const [show, setShow] = useState<boolean>(false);
+    const [numberOfLikes, setNumberOfLikes] = useState<number>(likes.length);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-
-    useEffect(() => {
-        setLike(likes.includes(uid || ''));
-    }, [likes, uid]);
 
     const handleLike = async () => {
         if (!uid) return;
@@ -55,14 +52,23 @@ export default function Post({ title, post, author: { name, photoURL, id }, dele
             await updateDoc(postRef, {
                 likes: arrayRemove(uid)
             });
+            setNumberOfLikes(prev => prev - 1);
         } else {
             await updateDoc(postRef, {
                 likes: arrayUnion(uid)
             });
+            setNumberOfLikes(prev => prev + 1);
         }
 
         setLike(!like);
     };
+
+    useEffect(() => {
+        setLike(likes.includes(uid || ''));
+        setNumberOfLikes(likes.length);
+    }, []);
+
+
 
     return (
         <Toast onClose={() => deleteDoc(postId)}>
@@ -85,7 +91,7 @@ export default function Post({ title, post, author: { name, photoURL, id }, dele
                     <FavoriteIcon style={{ cursor: 'pointer' }} onClick={handleLike} /> : 
                     <FavoriteBorderIcon style={{ cursor: 'pointer' }} onClick={handleLike} />
                 }
-                <span className='ms-1' style={{fontFamily: 'Space Grotesk, serif'}}>{likes.length}</span>
+                <span className='ms-1' style={{fontFamily: 'Space Grotesk, serif'}}>{numberOfLikes}</span>
                 <Comment 
                     handleClose={handleClose} 
                     show={show} 
