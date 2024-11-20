@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import Toast from 'react-bootstrap/Toast';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -32,13 +32,43 @@ type Props = {
     ];
 };
 
+type State = {
+    like: boolean;
+    numberOfLikes: number;
+};
+
+type Action =
+    | { type: 'LIKE'; uid: string }
+    | { type: 'UNLIKE'; uid: string }
+    | { type: 'RESET'; likes: string[]; uid: string };
+
+const likeReducer = (state: State, action: Action): State => {
+    switch (action.type) {
+        case 'LIKE':
+            return { like: true, numberOfLikes: state.numberOfLikes + 1 };
+        case 'UNLIKE':
+            return { like: false, numberOfLikes: state.numberOfLikes - 1 };
+        case 'RESET':
+            return {
+                like: action.likes.includes(action.uid),
+                numberOfLikes: action.likes.length,
+            };
+        default:
+            return state;
+    }
+};
+
+
 export default function Post({ title, post, author: { name, photoURL, id }, deleteDoc, id: postId, isAuth, uid, createdAt, likes, comments }: Props) {
 
     const timeAgo = createdAt ? formatDistanceToNow(new Date(createdAt), { addSuffix: true }) : "Just now";
 
-    const [like, setLike] = useState<boolean>(likes.includes(uid || ''));
     const [show, setShow] = useState<boolean>(false);
-    const [numberOfLikes, setNumberOfLikes] = useState<number>(likes.length);
+    const [state, dispatch] = useReducer(likeReducer, {
+        like: likes.includes(uid || ''),
+        numberOfLikes: likes.length,
+    });
+
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -48,25 +78,22 @@ export default function Post({ title, post, author: { name, photoURL, id }, dele
 
         const postRef = doc(db, "posts", postId);
 
-        if (like) {
+        if (state.like) {
             await updateDoc(postRef, {
                 likes: arrayRemove(uid)
             });
-            setNumberOfLikes(prev => prev - 1);
+            dispatch({ type: 'UNLIKE', uid });
         } else {
             await updateDoc(postRef, {
                 likes: arrayUnion(uid)
             });
-            setNumberOfLikes(prev => prev + 1);
+            dispatch({ type: 'LIKE', uid });
         }
-
-        setLike(!like);
     };
 
     useEffect(() => {
-        setLike(likes.includes(uid || ''));
-        setNumberOfLikes(likes.length);
-    }, []);
+        dispatch({ type: 'RESET', likes, uid: uid || '' });
+    }, [likes, uid]);
 
 
 
@@ -87,11 +114,11 @@ export default function Post({ title, post, author: { name, photoURL, id }, dele
                 {post}
             </Toast.Body>
             <Toast.Body className='d-flex align-items-center'>
-                {like ? 
+                {state.like ? 
                     <FavoriteIcon style={{ cursor: 'pointer' }} onClick={handleLike} /> : 
                     <FavoriteBorderIcon style={{ cursor: 'pointer' }} onClick={handleLike} />
                 }
-                <span className='ms-1' style={{fontFamily: 'Space Grotesk, serif'}}>{numberOfLikes}</span>
+                <span className='ms-1' style={{fontFamily: 'Space Grotesk, serif'}}>{state.numberOfLikes}</span>
                 <Comment 
                     handleClose={handleClose} 
                     show={show} 
